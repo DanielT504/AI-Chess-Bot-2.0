@@ -21,169 +21,289 @@ LAST_MOVE_COLOR = "#F9E79F"  # Hexadecimal value for red
 
 # Initialize the chess board
 board = chess.Board()
-
-#using piece square tables from the simplified evaluation fucntion
-p_w = [
-[ 0,  0,  0,  0,  0,  0,  0,  0],
-[50, 50, 50, 50, 50, 50, 50, 50],
-[10, 10, 20, 30, 30, 20, 10, 10],
-[ 5,  5, 10, 25, 25, 10,  5,  5],
-[ 0,  0,  0, 20, 20,  0,  0,  0],
-[ 5, -5,-10,  0,  0,-10, -5,  5],
-[ 5, 10, 10,-20,-20, 10, 10,  5],
-[ 0,  0,  0,  0,  0,  0,  0,  0]
-]
-
-p_b = [
-[ 0,  0,  0,  0,  0,  0,  0,  0],
-[ 5, 10, 10,-20,-20, 10, 10,  5],
-[ 5, -5,-10,  0,  0,-10, -5,  5],
-[ 0,  0,  0, 20, 20,  0,  0,  0],
-[ 5,  5, 10, 25, 25, 10,  5,  5],
-[10, 10, 20, 30, 30, 20, 10, 10],
-[50, 50, 50, 50, 50, 50, 50, 50],
-[ 0,  0,  0,  0,  0,  0,  0,  0]
-]
-
-n_w = [
-[-50, -40, -30, -30, -30, -30, -40, -50],
-[-40, -20,   0,   0,   0,   0, -20, -40],
-[-30,   0,  10,  15,  15,  10,   0, -30],
-[-30,   5,  15,  20,  20,  15,   5, -30],
-[-30,   0,  15,  20,  20,  15,   0, -30],
-[-30,   5,  10,  15,  15,  10,   5, -30],
-[-40, -20,   0,   5,   5,   0, -20, -40],
-[-50, -40, -30, -30, -30, -30, -40, -50]
-]
-
-n_b = [
-[-50, -40, -30, -30, -30, -30, -40, -50],
-[-40, -20,   0,   5,   5,   0, -20, -40],
-[-30,   5,  10,  15,  15,  10,   5, -30],
-[-30,   0,  15,  20,  20,  15,   0, -30],
-[-30,   5,  15,  20,  20,  15,   5, -30],
-[-30,   0,  10,  15,  15,  10,   0, -30],
-[-40, -20,   0,   0,   0,   0, -20, -40],
-[-50, -40, -30, -30, -30, -30, -40, -50]
-]
-
-b_w = [
-[-20, -10, -10, -10, -10, -10, -10, -20],
-[-10,   0,   0,   0,   0,   0,   0, -10],
-[-10,   0,   5,  10,  10,   5,   0, -10],
-[-10,   5,   5,  10,  10,   5,   5, -10],
-[-10,   0,  10,  10,  10,  10,   0, -10],
-[-10,  10,  10,  10,  10,  10,  10, -10],
-[-10,   5,   0,   0,   0,   0,   5, -10],
-[-20, -10, -10, -10, -10, -10, -10, -20]
-]
-
-b_b = [
-[-20, -10, -10, -10, -10, -10, -10, -20],
-[-10,   5,   0,   0,   0,   0,   5, -10],
-[-10,  10,  10,  10,  10,  10,  10, -10],
-[-10,   0,  10,  10,  10,  10,   0, -10],
-[-10,   5,   5,  10,  10,   5,   5, -10],
-[-10,   0,   5,  10,  10,   5,   0, -10],
-[-10,   0,   0,   0,   0,   0,   0, -10],
-[-20, -10, -10, -10, -10, -10, -10, -20]
-]
-
-r_w = [
-[ 0,  0,  0,  0,  0,  0,  0,  0],
-[ 5, 10, 10, 10, 10, 10, 10,  5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[ 0,  0,  0,  5,  5,  0,  0,  0]
-]
-
-r_b = [
-[ 0,  0,  0,  5,  5,  0,  0,  0],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[-5,  0,  0,  0,  0,  0,  0, -5],
-[ 5, 10, 10, 10, 10, 10, 10,  5],
-[ 0,  0,  0,  0,  0,  0,  0,  0]
-]
-
-q_w = [
-[-20, -10, -10,  -5,  -5, -10, -10, -20],
-[-10,   0,   0,   0,   0,   0,   0, -10],
-[-10,   0,   5,   5,   5,   5,   0, -10],
-[ -5,   0,   5,   5,   5,   5,   0,  -5],
-[  0,   0,   5,   5,   5,   5,   0,  -5],
-[-10,   5,   5,   5,   5,   5,   0, -10],
-[-10,   0,   5,   0,   0,   0,   0, -10],
-[-20, -10, -10,  -5,  -5, -10, -10, -20]
-]
-
-q_b = [
-[-20, -10, -10,  -5,  -5, -10, -10, -20],
-[-10,   0,   5,   0,   0,   0,   0, -10],
-[-10,   5,   5,   5,   5,   5,   0, -10],
-[  0,   0,   5,   5,   5,   5,   0,  -5],
-[ -5,   0,   5,   5,   5,   5,   0,  -5],
-[ -5,   0,   5,   5,   5,   5,   0, -10],
-[-10,   0,   0,   0,   0,   0,   0, -10],
-[-20, -10, -10,  -5,  -5, -10, -10, -20]
-]
-
-#not great for end game
-k_w = [
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-20, -30, -30, -40, -40, -30, -30, -20],
-[-10, -20, -20, -20, -20, -20, -20, -10],
-[ 20,  20,   0,   0,   0,   0,  20,  20],
-[ 20,  30,  10,   0,   0,  10,  30,  20]
-]
-
-k_b = [
-[ 20,  30,  10,   0,   0,  10,  30,  20],
-[ 20,  20,   0,   0,   0,   0,  20,  20],
-[-10, -20, -20, -20, -20, -20, -20, -10],
-[-20, -30, -30, -40, -40, -30, -30, -20],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30],
-[-30, -40, -40, -50, -50, -40, -40, -30]
-]
     
-def evaluate_board(board):
-    #to change
+def evaluate_board(board, turn):
+
+    piece_weights = {
+    chess.PAWN: 100,
+    chess.KNIGHT: 320,
+    chess.BISHOP: 330,
+    chess.ROOK: 500,
+    chess.QUEEN: 900,
+    chess.KING: 20000
+    }
+
+    #using piece square tables from the simplified evaluation fucntion
+    p_w = [
+    [ 0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [ 5,  5, 10, 25, 25, 10,  5,  5],
+    [ 0,  0,  0, 20, 20,  0,  0,  0],
+    [ 5, -5,-10,  0,  0,-10, -5,  5],
+    [ 5, 10, 10,-20,-20, 10, 10,  5],
+    [ 0,  0,  0,  0,  0,  0,  0,  0]
+    ]
+
+    p_b = [
+    [ 0,  0,  0,  0,  0,  0,  0,  0],
+    [ 5, 10, 10,-20,-20, 10, 10,  5],
+    [ 5, -5,-10,  0,  0,-10, -5,  5],
+    [ 0,  0,  0, 20, 20,  0,  0,  0],
+    [ 5,  5, 10, 25, 25, 10,  5,  5],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [ 0,  0,  0,  0,  0,  0,  0,  0]
+    ]
+
+    n_w = [
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20,   0,   0,   0,   0, -20, -40],
+    [-30,   0,  10,  15,  15,  10,   0, -30],
+    [-30,   5,  15,  20,  20,  15,   5, -30],
+    [-30,   0,  15,  20,  20,  15,   0, -30],
+    [-30,   5,  10,  15,  15,  10,   5, -30],
+    [-40, -20,   0,   5,   5,   0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
+    ]
+
+    n_b = [
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20,   0,   5,   5,   0, -20, -40],
+    [-30,   5,  10,  15,  15,  10,   5, -30],
+    [-30,   0,  15,  20,  20,  15,   0, -30],
+    [-30,   5,  15,  20,  20,  15,   5, -30],
+    [-30,   0,  10,  15,  15,  10,   0, -30],
+    [-40, -20,   0,   0,   0,   0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
+    ]
+
+    b_w = [
+    [-20, -10, -10, -10, -10, -10, -10, -20],
+    [-10,   0,   0,   0,   0,   0,   0, -10],
+    [-10,   0,   5,  10,  10,   5,   0, -10],
+    [-10,   5,   5,  10,  10,   5,   5, -10],
+    [-10,   0,  10,  10,  10,  10,   0, -10],
+    [-10,  10,  10,  10,  10,  10,  10, -10],
+    [-10,   5,   0,   0,   0,   0,   5, -10],
+    [-20, -10, -10, -10, -10, -10, -10, -20]
+    ]
+
+    b_b = [
+    [-20, -10, -10, -10, -10, -10, -10, -20],
+    [-10,   5,   0,   0,   0,   0,   5, -10],
+    [-10,  10,  10,  10,  10,  10,  10, -10],
+    [-10,   0,  10,  10,  10,  10,   0, -10],
+    [-10,   5,   5,  10,  10,   5,   5, -10],
+    [-10,   0,   5,  10,  10,   5,   0, -10],
+    [-10,   0,   0,   0,   0,   0,   0, -10],
+    [-20, -10, -10, -10, -10, -10, -10, -20]
+    ]
+
+    r_w = [
+    [ 0,  0,  0,  0,  0,  0,  0,  0],
+    [ 5, 10, 10, 10, 10, 10, 10,  5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [ 0,  0,  0,  5,  5,  0,  0,  0]
+    ]
+
+    r_b = [
+    [ 0,  0,  0,  5,  5,  0,  0,  0],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [ 5, 10, 10, 10, 10, 10, 10,  5],
+    [ 0,  0,  0,  0,  0,  0,  0,  0]
+    ]
+
+    q_w = [
+    [-20, -10, -10,  -5,  -5, -10, -10, -20],
+    [-10,   0,   0,   0,   0,   0,   0, -10],
+    [-10,   0,   5,   5,   5,   5,   0, -10],
+    [ -5,   0,   5,   5,   5,   5,   0,  -5],
+    [  0,   0,   5,   5,   5,   5,   0,  -5],
+    [-10,   5,   5,   5,   5,   5,   0, -10],
+    [-10,   0,   5,   0,   0,   0,   0, -10],
+    [-20, -10, -10,  -5,  -5, -10, -10, -20]
+    ]
+
+    q_b = [
+    [-20, -10, -10,  -5,  -5, -10, -10, -20],
+    [-10,   0,   5,   0,   0,   0,   0, -10],
+    [-10,   5,   5,   5,   5,   5,   0, -10],
+    [  0,   0,   5,   5,   5,   5,   0,  -5],
+    [ -5,   0,   5,   5,   5,   5,   0,  -5],
+    [ -5,   0,   5,   5,   5,   5,   0, -10],
+    [-10,   0,   0,   0,   0,   0,   0, -10],
+    [-20, -10, -10,  -5,  -5, -10, -10, -20]
+    ]
+
+    #not great for end game
+    k_w = [
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-20, -30, -30, -40, -40, -30, -30, -20],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [ 20,  20,   0,   0,   0,   0,  20,  20],
+    [ 20,  30,  10,   0,   0,  10,  30,  20]
+    ]
+
+    k_b = [
+    [ 20,  30,  10,   0,   0,  10,  30,  20],
+    [ 20,  20,   0,   0,   0,   0,  20,  20],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [-20, -30, -30, -40, -40, -30, -30, -20],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30]
+    ]
+
     total_evaluation = 0
+    pawns = {}
+    isolated_pawns = {}
+    doubled_pawns = {}
+    blocked_pawns = {}
+    black_pawns = {}
+    black_isolated_pawns = {}
+    black_doubled_pawns = {}
+    black_blocked_pawns = {}
+    opponent_legal_moves = list(board.copy(stack=False).legal_moves)
+    
     for rank in range(8):
         for file in range(8):
             square = chess.square(file, rank)
             piece = board.piece_at(square)
             if piece is not None:
                 if piece.piece_type == chess.PAWN:
-                    total_evaluation += 100 + (p_w[rank][file] if piece.color == chess.WHITE else p_b[rank][file])
+                    if piece.color == chess.WHITE:
+                        pawn_value = chess.PAWN + p_w[rank][file]
+                    else:
+                        pawn_value = -chess.PAWN - p_b[rank][file]
+                    
+                    total_evaluation += pawn_value
+                    if piece.color == chess.WHITE:
+                        if file in pawns:
+                            pawns[file].append(pawn_value)
+                        else:
+                            pawns[file] = [pawn_value]
+                            
+                        if file - 1 not in pawns and file + 1 not in pawns:
+                            isolated_pawns[file] = True
+                            
+                        if file in doubled_pawns:
+                            doubled_pawns[file] += 1
+                        else:
+                            doubled_pawns[file] = 1
+                            
+                        if piece.color == chess.WHITE:
+                            blocking_rank = rank - 1
+                        else:
+                            blocking_rank = rank + 1
+                        if blocking_rank >= 0 and blocking_rank <= 7:
+                            blocking_square = chess.square(file, blocking_rank)
+                            blocking_piece = board.piece_at(blocking_square)
+                            if blocking_piece is not None and blocking_piece.piece_type == chess.PAWN:
+                                blocked_pawns[file] = True
+                    else:
+                        if file in black_pawns:
+                            black_pawns[file].append(pawn_value)
+                        else:
+                            black_pawns[file] = [pawn_value]
+                        
+                        if file - 1 not in black_pawns and file + 1 not in black_pawns:
+                            black_isolated_pawns[file] = True
+                        
+                        if file in black_doubled_pawns:
+                            black_doubled_pawns[file] += 1
+                        else:
+                            black_doubled_pawns[file] = 1
+                        
+                        blocking_rank = rank + 1
+                        if blocking_rank >= 0 and blocking_rank <= 7:
+                            blocking_square = chess.square(file, blocking_rank)
+                            blocking_piece = board.piece_at(blocking_square)
+                            if blocking_piece is not None and blocking_piece.piece_type == chess.PAWN:
+                                black_blocked_pawns[file] = True
+                        
                 elif piece.piece_type == chess.ROOK:
-                    total_evaluation += 500 + (r_w[rank][file] if piece.color == chess.WHITE else r_b[rank][file])
+                    total_evaluation += chess.ROOK * (1 if piece.color == chess.WHITE else -1) + (r_w[rank][file] if piece.color == chess.WHITE else -r_b[rank][file])
                 elif piece.piece_type == chess.KNIGHT:
-                    total_evaluation += 320 + (n_w[rank][file] if piece.color == chess.WHITE else n_b[rank][file])
+                    total_evaluation += chess.KNIGHT * (1 if piece.color == chess.WHITE else -1) + (n_w[rank][file] if piece.color == chess.WHITE else -n_b[rank][file])
                 elif piece.piece_type == chess.BISHOP:
-                    total_evaluation += 330 + (b_w[rank][file] if piece.color == chess.WHITE else b_b[rank][file])
+                    total_evaluation += chess.BISHOP * (1 if piece.color == chess.WHITE else -1) + (b_w[rank][file] if piece.color == chess.WHITE else -b_b[rank][file])
                 elif piece.piece_type == chess.QUEEN:
-                    total_evaluation += 900 + (q_w[rank][file] if piece.color == chess.WHITE else q_b[rank][file])
+                    total_evaluation += chess.QUEEN * (1 if piece.color == chess.WHITE else -1) + (q_w[rank][file] if piece.color == chess.WHITE else -q_b[rank][file])
                 elif piece.piece_type == chess.KING:
-                    total_evaluation += 20000 + (k_w[rank][file] if piece.color == chess.WHITE else k_b[rank][file])
-    print("{}\n".format(total_evaluation))
+                    total_evaluation += chess.KING * (1 if piece.color == chess.WHITE else -1) + (k_w[rank][file] if piece.color == chess.WHITE else -k_b[rank][file])
+    
+    # unsure about this weight
+    total_evaluation += len(isolated_pawns) * (-100)
+    total_evaluation += len(doubled_pawns) * (-200)
+    total_evaluation += len(blocked_pawns) * (-100)
+    
+    player_legal_moves = list(board.legal_moves)
+    board.turn = not board.turn  # Switch to opponent's turn
+    opponent_legal_moves = list(board.legal_moves)
+    board.turn = not board.turn  # Switch to opponent's turn
+    mobility_score = 10 * (len(player_legal_moves) - len(opponent_legal_moves))
+    total_evaluation += mobility_score
+    
+    # unsure about this weight
+    captures_score = 5 * len([move for move in player_legal_moves if board.is_capture(move)])
+    total_evaluation += captures_score
+    captures_score = -5 * len([move for move in opponent_legal_moves if board.is_capture(move)])
+    total_evaluation += captures_score
+    
+    threatened_pieces_score = 0.0
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece:
+            if any(move.to_square == square and board.is_capture(move) for move in opponent_legal_moves):
+                # unsure about this weight
+                threatened_pieces_score -= 100 * piece_weights.get(piece.piece_type, 0)
+    total_evaluation += threatened_pieces_score
+    
+    #adjust for king
+    threatening_pieces_score = 0.0
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece:
+            if any(move.to_square == square and board.is_capture(move) for move in player_legal_moves):
+                # unsure about this weight
+                threatening_pieces_score += 10 * piece_weights.get(piece.piece_type, 0)
+    total_evaluation += threatening_pieces_score
+    
+    print("Total Evaluation: {}".format(total_evaluation))
+    print("Pawns: {}".format(pawns))
+    print("Isolated Pawns: {}".format(isolated_pawns))
+    print("Doubled Pawns: {}".format(doubled_pawns))
+    print("Blocked Pawns: {}".format(blocked_pawns))
+    print("Black Pawns: {}".format(black_pawns))
+    print("Black Isolated Pawns: {}".format(black_isolated_pawns))
+    print("Black Doubled Pawns: {}".format(black_doubled_pawns))
+    print("Black Blocked Pawns: {}".format(black_blocked_pawns))
+    #print("Player Legal Moves: {}".format(player_legal_moves))
+    #print("Opponent Legal Moves: {}".format(opponent_legal_moves))
+    print("Mobility Score: {}".format(mobility_score))
+    print("Captures Score: {}".format(captures_score))
+    print("Threatened Pieces Score: {}".format(threatened_pieces_score))
+    print("Threatening Pieces Score: {}".format(threatening_pieces_score))
+
     return total_evaluation
 
 def alphabeta(board, depth, alpha, beta, maximizing_player):
-    best_value = float('inf')
+    best_value = float('-inf') if maximizing_player else float('inf')
     if depth:
         if maximizing_player:
-            best_value = -best_value
             for move in list(board.legal_moves):
                 board.push(move)
                 min_player = not maximizing_player
@@ -208,9 +328,9 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
                     beta = best_value
                 if alpha >= beta:
                     break
-            return best_value        
+            return evaluate_board(board, not maximizing_player)
     else:
-        return evaluate_board(board)
+        return best_value
 
 
 def on_square_click(square):
@@ -260,7 +380,7 @@ def refresh_board():
 
 def make_ai_move():
     global last_move_start, last_move_end
-    depth = 2  # Adjust the depth according to your preference
+    depth = 1  # Adjust the depth according to your preference
     legal_moves = list(board.legal_moves)
 
     if len(legal_moves) == 0:
@@ -272,13 +392,13 @@ def make_ai_move():
 
     for move in legal_moves:
         board.push(move)
-        score = alphabeta(board, depth - 1, -float('inf'), float('inf'), False)
+        score = alphabeta(board, depth, -float('inf'), float('inf'), False)
         board.pop()
         print("score: {}".format(score))
         if score > best_score:
             best_score = score
             best_move = move
-
+    print("best: {}".format(best_score))
     if best_move is not None:
         last_move_start = best_move.from_square
         last_move_end = best_move.to_square
