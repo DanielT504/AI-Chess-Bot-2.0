@@ -9,15 +9,33 @@ last_move_start = None
 last_move_end = None
 
 # Board dimensions
-BOARD_WIDTH = BOARD_HEIGHT = 600
+BOARD_WIDTH = BOARD_HEIGHT = 700
 SQUARE_SIZE = BOARD_WIDTH // 8
-MAX_DEPTH = 3
+MAX_DEPTH = 1
 
 # Colors
 LIGHT_SQUARE_COLOR = "#F0D9B5"  # Hexadecimal value for (240, 217, 181)
 DARK_SQUARE_COLOR = "#B58863"  # Hexadecimal value for (181, 136, 99)
 SELECTED_SQUARE_COLOR = "#7A9ECA"  # Hexadecimal value for (122, 158, 202)
-LAST_MOVE_COLOR = "#F9E79F"  # Hexadecimal value for red
+LAST_MOVE_COLOR = "#FFA500"  # Hexadecimal value for red
+
+WHITE_PIECE_ICONS = {
+    chess.PAWN: "♙",
+    chess.KNIGHT: "♘",
+    chess.BISHOP: "♗",
+    chess.ROOK: "♖",
+    chess.QUEEN: "♕",
+    chess.KING: "♔",
+}
+
+BLACK_PIECE_ICONS = {
+    chess.PAWN: "♟",
+    chess.KNIGHT: "♞",
+    chess.BISHOP: "♝",
+    chess.ROOK: "♜",
+    chess.QUEEN: "♛",
+    chess.KING: "♚",
+}
 
 # Initialize the chess board
 board = chess.Board()
@@ -272,6 +290,7 @@ def evaluate_board(board, turn):
     captured_score = -5 * len([move for move in player_legal_moves if board.is_capture(move)])
     total_evaluation += captured_score
     
+    #weight might be off
     threatened_pieces_score = 0.0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
@@ -375,6 +394,7 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
 
 def on_square_click(square):
     global selected_square
+
     if selected_square is None:
         selected_square = square
     else:
@@ -399,6 +419,9 @@ def on_square_click(square):
                 selected_square = None
                 make_ai_move()
                 refresh_board()
+                # Check if the game is over (checkmate)
+                if board.is_checkmate():
+                    messagebox.showinfo("Game Over", "Checkmate! You lost.")  # Display checkmate message
         else:
             messagebox.showinfo("Invalid Move", "Invalid move. Please try again.")
             selected_square = None
@@ -407,8 +430,16 @@ def on_square_click(square):
 def refresh_board():
     for square, button in board_buttons.items():
         piece = board.piece_at(square)
-        piece_symbol = piece.symbol() if piece else ""
+        if piece:
+            if piece.color == chess.WHITE:
+                piece_symbol = WHITE_PIECE_ICONS.get(piece.piece_type, "")
+            else:
+                piece_symbol = BLACK_PIECE_ICONS.get(piece.piece_type, "")
+        else:
+            piece_symbol = ""
+
         button["text"] = piece_symbol
+        button.config(font=("Arial", 15))  # Increased font size
 
         button_color = LIGHT_SQUARE_COLOR if (chess.square_file(square) + chess.square_rank(square)) % 2 == 0 else DARK_SQUARE_COLOR
         if square == selected_square:
@@ -420,7 +451,7 @@ def refresh_board():
 
 def make_ai_move():
     global last_move_start, last_move_end
-    depth = 2  # 5 takes ~3min for the first move, 4 takes ~1min, 3 takes ~3sec
+    depth = MAX_DEPTH  # 5 takes ~3min for the first move, 4 takes ~1min, 3 takes ~3sec
     legal_moves = list(board.legal_moves)
 
     if len(legal_moves) == 0:
@@ -455,7 +486,7 @@ def create_board_ui(root):
     for row in range(8):
         for col in range(8):
             square = chess.square(col, 7 - row)
-            button = tk.Button(board_frame, width=5, height=2, command=lambda sq=square: on_square_click(sq))
+            button = tk.Button(board_frame, width=7, height=3, command=lambda sq=square: on_square_click(sq))  # Increased button size
             button.grid(row=row, column=col)
             board_buttons[square] = button
 
@@ -463,6 +494,7 @@ def create_board_ui(root):
 def play_chess():
     root = tk.Tk()
     root.title("Chess")
+    root.geometry(f"{BOARD_WIDTH}x{BOARD_HEIGHT}")  # Set window size
     create_board_ui(root)
     refresh_board()
     root.mainloop()
