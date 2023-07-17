@@ -370,7 +370,7 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
                     alpha = best_value
                 if alpha >= beta:
                     break
-            print(" " * (depth) + f"Depth {depth} Max: {best_value}")
+            #print(" " * (depth) + f"Depth {depth} Max: {best_value}")
             return best_value
         else:
             for move in list(board.legal_moves):
@@ -384,11 +384,11 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
                     beta = best_value
                 if alpha >= beta:
                     break
-            print(" " * (depth) + f"Depth {depth} Min: {best_value}")
+            #print(" " * (depth) + f"Depth {depth} Min: {best_value}")
             return best_value
     else:
         x=evaluate_board(board, not maximizing_player)
-        print(" " * (depth) + f"Depth {depth} Score: {x}")
+        #print(" " * (depth) + f"Depth {depth} Score: {x}")
         return x
 
 
@@ -464,13 +464,13 @@ def make_ai_move():
     for move in legal_moves:
         board.push(move)
         score = alphabeta(board, depth - 1, -float('inf'), float('inf'), False)
-        print("move: {}".format(move))
+        #print("move: {}".format(move))
         board.pop()
-        print("score: {}\n".format(score))
+        #print("score: {}\n".format(score))
         if score > best_score:
             best_score = score
             best_move = move
-    print("best: {}".format(best_score))
+    #print("best: {}".format(best_score))
     if best_move is not None:
         last_move_start = best_move.from_square
         last_move_end = best_move.to_square
