@@ -4,10 +4,15 @@ This is my 2nd attempt at a minimax chess intelligence (you can see the first [h
 
 Currently acts based on positional/structural incentives, capture potential, mobility, and material balance. It can sometimes get stuck in loops of jiggling the rook back and forth to remain in a neutral state. The alpha-beta pruning helps with the computation time, but anything longer than a depth of 3 will take several minutes per move.
 
+![chess-bot](https://github.com/DanielT504/AI-Chess-Bot-2.0/assets/62156098/e632f10e-0483-4998-8e0d-6da8adb1aae8) 
+
+*result of a facilitated game between my AI and Chess.com's starter player
+
+![image](https://github.com/DanielT504/AI-Chess-Bot-2.0/assets/62156098/f7c352ae-2c97-4add-9caf-acb560404329)
 
 TODO:
 
-*Evaluation of:  king safety, incentivisize pawn chains
+*Evaluation of:  king safety, incentivize pawn chains
 
 Transposition table
 
