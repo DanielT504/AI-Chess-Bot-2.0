@@ -23,7 +23,14 @@ LAST_MOVE_COLOR = "#F9E79F"  # Hexadecimal value for red
 board = chess.Board()
     
 def evaluate_board(board, turn):
-
+    #print("{}".format(turn))
+    '''
+    if turn == chess.BLACK:
+        print("black")
+    else:
+        print("white")
+    '''
+    
     piece_weights = {
     chess.PAWN: 100,
     chess.KNIGHT: 320,
@@ -176,7 +183,6 @@ def evaluate_board(board, turn):
     black_isolated_pawns = {}
     black_doubled_pawns = {}
     black_blocked_pawns = {}
-    opponent_legal_moves = list(board.copy(stack=False).legal_moves)
     
     for rank in range(8):
         for file in range(8):
@@ -245,45 +251,55 @@ def evaluate_board(board, turn):
                 elif piece.piece_type == chess.KING:
                     total_evaluation += chess.KING * (1 if piece.color == chess.WHITE else -1) + (k_w[rank][file] if piece.color == chess.WHITE else -k_b[rank][file])
     
-    # unsure about this weight
     total_evaluation += len(isolated_pawns) * (-100)
     total_evaluation += len(doubled_pawns) * (-200)
     total_evaluation += len(blocked_pawns) * (-100)
+    total_evaluation += len(black_isolated_pawns) * (100)
+    total_evaluation += len(black_doubled_pawns) * (200)
+    total_evaluation += len(black_blocked_pawns) * (100)
     
     player_legal_moves = list(board.legal_moves)
+    #print("player_legal_moves: {}".format(player_legal_moves))
     board.turn = not board.turn  # Switch to opponent's turn
-    opponent_legal_moves = list(board.legal_moves)
+    ai_legal_moves = list(board.legal_moves)
+    #print("ai_legal_moves: {}".format(ai_legal_moves))
     board.turn = not board.turn  # Switch to opponent's turn
-    mobility_score = 10 * (len(player_legal_moves) - len(opponent_legal_moves))
+    mobility_score = 10 * (len(ai_legal_moves) - len(player_legal_moves))
     total_evaluation += mobility_score
     
-    # unsure about this weight
-    captures_score = 5 * len([move for move in player_legal_moves if board.is_capture(move)])
+    captures_score = 5 * len([move for move in ai_legal_moves if board.is_capture(move)])
     total_evaluation += captures_score
-    captures_score = -5 * len([move for move in opponent_legal_moves if board.is_capture(move)])
-    total_evaluation += captures_score
+    captured_score = -5 * len([move for move in player_legal_moves if board.is_capture(move)])
+    total_evaluation += captured_score
     
     threatened_pieces_score = 0.0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
-        if piece:
-            if any(move.to_square == square and board.is_capture(move) for move in opponent_legal_moves):
-                # unsure about this weight
-                threatened_pieces_score -= 100 * piece_weights.get(piece.piece_type, 0)
+        if piece and piece.color == chess.BLACK:
+            if any(move.to_square == square and board.is_capture(move) for move in player_legal_moves):
+                threatened_pieces_score -= 10 * piece_weights.get(piece.piece_type, 0)
     total_evaluation += threatened_pieces_score
     
-    #adjust for king
     threatening_pieces_score = 0.0
     for square in chess.SQUARES:
         piece = board.piece_at(square)
-        if piece:
-            if any(move.to_square == square and board.is_capture(move) for move in player_legal_moves):
-                # unsure about this weight
-                threatening_pieces_score += 10 * piece_weights.get(piece.piece_type, 0)
+        if piece and piece.color == chess.WHITE:
+            if any(move.to_square == square and board.is_capture(move) for move in ai_legal_moves):
+                #weights commented until balanced
+                if piece.piece_type != chess.KING or not board.is_check():
+                    threatened_pieces_score = threatened_pieces_score
+                    #threatening_pieces_score += piece_weights.get(piece.piece_type, 0)
+                else:
+                    threatening_piece_square = get_threatening_piece_square(board, square)
+                    if board.is_checkmate():
+                        threatening_pieces_score = float('inf')
+                    elif is_square_safe(board, threatening_piece_square):
+                        threatened_pieces_score = threatened_pieces_score
+                        #threatening_pieces_score += piece_weights.get(piece.piece_type, 0)
     total_evaluation += threatening_pieces_score
     
+    '''
     print("Total Evaluation: {}".format(total_evaluation))
-    print("Pawns: {}".format(pawns))
     print("Isolated Pawns: {}".format(isolated_pawns))
     print("Doubled Pawns: {}".format(doubled_pawns))
     print("Blocked Pawns: {}".format(blocked_pawns))
@@ -294,11 +310,31 @@ def evaluate_board(board, turn):
     #print("Player Legal Moves: {}".format(player_legal_moves))
     #print("Opponent Legal Moves: {}".format(opponent_legal_moves))
     print("Mobility Score: {}".format(mobility_score))
+    print("Captures Score: {}".format(captured_score))
     print("Captures Score: {}".format(captures_score))
     print("Threatened Pieces Score: {}".format(threatened_pieces_score))
-    print("Threatening Pieces Score: {}".format(threatening_pieces_score))
-
+    print("Threatening Pieces Score: {}\n".format(threatening_pieces_score))
+    '''
+    
+    if turn == chess.BLACK:
+        total_evaluation = -total_evaluation
+    
     return total_evaluation
+
+def get_threatening_piece_square(board, target_square):
+    piece = board.piece_at(target_square)
+    if piece is not None:
+        attackers = board.attackers(not piece.color, target_square)
+        if attackers:
+            return attackers.pop()
+    return None
+
+def is_square_safe(board, square):
+    piece = board.piece_at(square)
+    if piece is not None:
+        attackers = board.attackers(not piece.color, square)
+        return len(attackers) == 0
+    return True
 
 def alphabeta(board, depth, alpha, beta, maximizing_player):
     best_value = float('-inf') if maximizing_player else float('inf')
@@ -315,6 +351,7 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
                     alpha = best_value
                 if alpha >= beta:
                     break
+            print(" " * (depth) + f"Depth {depth} Max: {best_value}")
             return best_value
         else:
             for move in list(board.legal_moves):
@@ -328,9 +365,12 @@ def alphabeta(board, depth, alpha, beta, maximizing_player):
                     beta = best_value
                 if alpha >= beta:
                     break
-            return evaluate_board(board, not maximizing_player)
+            print(" " * (depth) + f"Depth {depth} Min: {best_value}")
+            return best_value
     else:
-        return best_value
+        x=evaluate_board(board, not maximizing_player)
+        print(" " * (depth) + f"Depth {depth} Score: {x}")
+        return x
 
 
 def on_square_click(square):
@@ -380,7 +420,7 @@ def refresh_board():
 
 def make_ai_move():
     global last_move_start, last_move_end
-    depth = 1  # Adjust the depth according to your preference
+    depth = 2  # 5 takes ~3min for the first move, 4 takes ~1min, 3 takes ~3sec
     legal_moves = list(board.legal_moves)
 
     if len(legal_moves) == 0:
@@ -392,9 +432,10 @@ def make_ai_move():
 
     for move in legal_moves:
         board.push(move)
-        score = alphabeta(board, depth, -float('inf'), float('inf'), False)
+        score = alphabeta(board, depth - 1, -float('inf'), float('inf'), False)
+        print("move: {}".format(move))
         board.pop()
-        print("score: {}".format(score))
+        print("score: {}\n".format(score))
         if score > best_score:
             best_score = score
             best_move = move

@@ -4,10 +4,9 @@ This is my 2nd attempt at a chess intelligence (you can see the first [here](htt
 
 Currently acts purely based on positional incentives and material balance, and thus gets stuck in loops of jiggling the rook back and forth to remain in a neutral position. The immediate next step to evade this will be the starred task in TODO.
 
-
 TODO:
 
-*Evaluation of: pawn structure, piece mobility, captures, king safety, threatened pieces
+*Evaluation of:  king safety, incentivisize pawn chains
 
 Transposition table
 
